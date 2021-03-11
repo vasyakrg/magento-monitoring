@@ -18,7 +18,7 @@ for SITE in ${DBS[*]}
     DBASEUSER=$(grep database_user ${WWW_FOLDER}/${SITE}/backup.env | cut -f 2 -d '=')
     DBASEPASS=$(grep database_password ${WWW_FOLDER}/${SITE}/backup.env | cut -f 2 -d '=')
 
-    FILE=${BACKUP_DIR}/${SITE}/${SITE}_dump_${DATE}.sql.gz
+    FILE=${BACKUP_DIR}/site/${SITE}/${SITE}_dump_${DATE}.sql.gz
 
     echo ">>> mysqlmump $FILE" >> ${SCRIPT_DIR}/log.out
 
