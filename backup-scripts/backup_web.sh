@@ -18,7 +18,7 @@ for SITE in ${SITES[*]}
     echo ">>> backup $FILE" >> ${SCRIPT_DIR}/log.out
 
     echo "tar -czf $FILE ${WWW_FOLDER}/${SITE}"
-    tar -czf $FILE -C ${WWW_FOLDER}/${SITE} > /dev/null
+    tar -czf $FILE ${WWW_FOLDER}/${SITE} > /dev/null
   done
 
 echo ">>> [ SITES ]" >> ${SCRIPT_DIR}/log.out
