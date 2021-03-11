@@ -11,8 +11,8 @@ echo ">>> [ DB ]" >> ${SCRIPT_DIR}/log.out
 
 for SITE in ${DBS[*]}
   do
-    if [ ! -d ${BACKUP_DIR}/${SITE} ]; then
-      mkdir -p ${BACKUP_DIR}/${SITE}
+    if [ ! -d ${BACKUP_DIR}/site/${SITE} ]; then
+      mkdir -p ${BACKUP_DIR}/site/${SITE}
     fi
     DBASE=$(grep dbase ${WWW_FOLDER}/${SITE}/backup.env | cut -f 2 -d '=')
     DBASEUSER=$(grep database_user ${WWW_FOLDER}/${SITE}/backup.env | cut -f 2 -d '=')
