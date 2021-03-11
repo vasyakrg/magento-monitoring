@@ -1,0 +1,120 @@
+version: '3.7'
+services:
+    grafana:
+      container_name: ${APP_NAME}_grafana
+      image: grafana/grafana:latest
+      restart: always
+      environment:
+        - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+        - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+        - GF_AUTH_ANONYMOUS_ENABLED=false
+        - GF_USERS_ALLOW_SIGN_UP=false
+        - GF_USERS_ALLOW_ORG_CREATE=false
+        - VIRTUAL_ROOT=/var/www/html
+        - VIRTUAL_PORT=3000
+        - LETSENCRYPT_HOST=${DOMAIN_NAME}
+        - VIRTUAL_HOST=${DOMAIN_NAME}
+        - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      volumes:
+        - grafana:/var/lib/grafana
+      depends_on:
+        - graphite
+      # ports:
+      #   - ${BACKEND_PORT}:3000
+      networks:
+        - monitor_net
+        - webproxy
+
+    graphite:
+      container_name: ${APP_NAME}_graphite
+      image: graphiteapp/graphite-statsd:1.1.5-3
+      restart: always
+      volumes:
+        - ./graphite/graphite.db:/opt/graphite/storage/graphite.db
+        - ./graphite/storage-schemas.conf:/opt/graphite/conf/storage-schemas.conf
+        - ./graphite/storage-aggregation.conf:/opt/graphite/conf/storage-aggregation.conf
+        - ./graphite/carbon.conf:/opt/graphite/conf/carbon.conf
+      networks:
+        - monitor_net
+
+    grafana-setup:
+      container_name: ${APP_NAME}_grafana-setup
+      image: sitespeedio/grafana-bootstrap:latest
+      depends_on:
+        - grafana
+      environment:
+        - GF_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+        - GF_USER=${GF_SECURITY_ADMIN_USER}
+      networks:
+        - monitor_net
+
+    sitespeed:
+      container_name: ${APP_NAME}_sitespeed
+      image: sitespeedio/sitespeed.io
+      privileged: true
+      command: --shm-size=1g --rm sitespeedio/sitespeed.io ${HOST} -n 1 --speedIndex -b chrome --graphite.host=graphite
+      links:
+        - graphite
+      networks:
+        - monitor_net
+
+    prometheus:
+      container_name: ${APP_NAME}_prometheus
+      image: prom/prometheus:v2.1.0
+      restart: always
+      command:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+        - '--web.console.templates=/usr/share/prometheus/consoles'
+      volumes:
+        - ./prometheus/:/etc/prometheus/
+        - prometheus_data:/prometheus
+      # ports:
+      #   - 9090:9090
+      networks:
+        - monitor_net
+
+    alertmanager:
+      container_name: ${APP_NAME}_alertmanager
+      image: prom/alertmanager
+      restart: always
+      command:
+        - '--config.file=/etc/alertmanager/config.yml'
+        - '--storage.path=/alertmanager'
+      volumes:
+        - ./alertmanager/:/etc/alertmanager/
+      # ports:
+      #   - 9093:9093
+      networks:
+        - monitor_net
+
+    alertmanager-bot:
+      container_name: ${APP_NAME}_alertmanager-bot
+      image: metalmatze/alertmanager-bot
+      restart: always
+      environment:
+        - ALERTMANAGER_URL=http://alertmanager:9093
+        - LISTEN_ADDR=0.0.0.0:8080
+        - BOLT_PATH=/data/bot.db
+        - STORE=bolt
+        - TELEGRAM_ADMIN=${TELEGRAM_CHAT_ID}
+        - TELEGRAM_TOKEN=${TELEGRAM_BOT_TOKEN}
+        - TEMPLATE_PATHS=/templates/default.tmpl
+      volumes:
+        - ./alertmanager-bot:/data
+      # ports:
+      #   - 8085:8080
+      networks:
+        - monitor_net
+
+volumes:
+  prometheus_data:
+  grafana:
+
+networks:
+  webproxy:
+    external:
+      name: webproxy
+  monitor_net:
+    name: monitor_net

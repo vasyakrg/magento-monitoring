@@ -1,0 +1,5 @@
+- targets:
+   - 51.83.239.103:9131
+  labels:
+    env: prod
+    job: varnish-supershop

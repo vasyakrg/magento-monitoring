@@ -1,0 +1,5 @@
+
+sub vcl_backend_error {
+        synthetic(std.fileread("/etc/varnish/maintenance.html"));
+    return (deliver);
+}

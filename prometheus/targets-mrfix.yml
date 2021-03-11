@@ -1,0 +1,5 @@
+- targets:
+   - 51.83.238.106:9131
+  labels:
+    env: prod
+    job: varnish-mrfix

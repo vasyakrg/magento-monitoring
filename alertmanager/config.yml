@@ -1,0 +1,19 @@
+route:
+  group_wait: 60s        #  Частота
+  group_interval: 60s   #  уведомлений
+  repeat_interval: 3000s  #  в телеграм
+  group_by: ['alertname', 'cluster', 'service']
+  receiver: alertmanager-bot
+
+receivers:
+- name: alertmanager-bot
+  webhook_configs:
+  - send_resolved: true
+    url: 'http://alertmanager-bot:8080'
+
+- name: 'slack'
+#       slack_configs:
+#           - send_resolved: true
+#             username: '<username>'
+#             channel: '#<channel-name>'
+#             api_url: '<incomming-webhook-url>'

@@ -1,0 +1,58 @@
+groups:
+- name: varnish
+  rules:
+########## varnish ##########
+  - alert: varnish_is_running
+    expr: up == 0
+    for: 120s
+    labels:
+      severity: critical
+      alertname: "Varnish has been down for more than 30 seconds"
+    annotations:
+      summary: "Critical: Varnish is down on the host {{ $labels.instance }}."
+      message: "Critical: Varnish is down on the host {{ $labels.instance }}."
+      description: "Varnish has been down for more than 120 seconds"
+
+  - alert: varnish_number_backend_down_
+    expr: count by (instance) (varnish_backend_up == 0) > 10
+    for: 120s
+    labels:
+      severity: critical
+      alertname: "Varnish number of DOWN backends are {{ $value }}"
+    annotations:
+      summary: "Critical: Varnish number of DOWN backends too many(>10) on the instance {{ $labels.instance }} for more than 2 minutes"
+      message: "Critical: Varnish number of DOWN backends too many(>10) on the instance {{ $labels.instance }} for more than 2 minutes"
+      description: "Varnish number of DOWN backends are {{ $value }}"
+
+  - alert: varnish_high_number_client/frontend_connections
+    expr: rate(varnish_main_client_req[5m]) > 400
+    for: 3m
+    labels:
+      severity: critical
+      alertname: "Varnish number client/frontend connections is {{ $value }}"
+    annotations:
+      description: "Critical: varnish high number client/frontend connections(>400) on the host {{ $labels.instance }} for more than 3 minutes"
+      message: "Critical: varnish high number client/frontend connections(>400) on the host {{ $labels.instance }} for more than 3 minutes"
+      summary: "Varnish number client/frontend connections is {{ $value }}"
+
+  - alert: varnish_high_number_backend_connections
+    expr: rate(varnish_main_backend_req[5m]) > 300
+    for: 3m
+    labels:
+      severity: critical
+      alertname: "Varnish number backend connections is {{ $value }}"
+    annotations:
+      description: "Critical: varnish high number backend connections(>300) on the host {{ $labels.instance }} for more than 3 minutes"
+      message: "Critical: varnish high number backend connections(>300) on the host {{ $labels.instance }} for more than 3 minutes"
+      summary: "Varnish number backend connections is {{ $value }}"
+
+  - alert: varnish_cache_hit_rate
+    expr: avg(( rate(varnish_main_cache_hit[5m]) / rate(varnish_main_client_req[5m]) )) * 100 < 10
+    for: 5m
+    labels:
+      severity: warning
+      alertname: "Varnish cache hit rate is {{ $value }}%"
+    annotations:
+      description: "Warning: Varnish cache hit rate is too small(<10%) on the host {{ $labels.instance }} for more than 5 minutes"
+      message: "Warning: Varnish cache hit rate is too small(<10%) on the host {{ $labels.instance }} for more than 5 minutes"
+      summary: "Varnish cache hit rate is {{ $value }}%"
