@@ -9,11 +9,11 @@ IFS=$'\r\n' command eval "SITES=($(cat ${SCRIPT_DIR}/sites.list))"
 
 for SITE in ${SITES[*]}
   do
-    if [ ! -d ${BACKUP_DIR}/${SITE} ]; then
-      mkdir -p ${BACKUP_DIR}/${SITE}
+    if [ ! -d ${BACKUP_DIR}/site/${SITE} ]; then
+      mkdir -p ${BACKUP_DIR}/site/${SITE}
     fi
 
-    FILE=${BACKUP_DIR}/${SITE}/${SITE}_files_${DATE}.tar.gz
+    FILE=${BACKUP_DIR}/site/${SITE}/${SITE}_files_${DATE}.tar.gz
     echo ">>> [ SITES ]" >> ${SCRIPT_DIR}/log.out
     echo ">>> backup $FILE" >> ${SCRIPT_DIR}/log.out
 
