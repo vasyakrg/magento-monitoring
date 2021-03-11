@@ -5,7 +5,7 @@ source .env
 
 IFS=$'\r\n' command eval "DBS=($(cat ${SCRIPT_DIR}/sites.list))"
 
-echo ">>> upload configs nginx" > ${SCRIPT_DIR}/log.b2.out
+echo ">>> upload configs nginx"
 /usr/bin/b2 sync --keepDays ${B2_KEEP} ${BACKUP_DIR}/configs/ b2://${B2_BACKET}/configs/ >> ${SCRIPT_DIR}/log.b2.out
 
 for SITE in ${SITES[*]}
